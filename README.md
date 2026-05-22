@@ -1,7 +1,7 @@
 # Enterprise RAG Knowledge Assistant
 
 ## Executive summary
-Enterprise knowledge is often fragmented across policy docs, runbooks, and operational files. That fragmentation makes fast, reliable internal search difficult for teams. This project provides a full-stack Retrieval-Augmented Generation (RAG) assistant that ingests documents, chunks and indexes content, retrieves evidence with semantic and lexical signals, and returns grounded responses with citations in a reproducible local setup.
+Enterprise knowledge is often fragmented across policy docs, runbooks, and operational files. This complexity makes fast, reliable internal search difficult for teams. This project provides a full-stack Retrieval-Augmented Generation (RAG) assistant that ingests documents, chunks and indexes content, retrieves evidence with semantic and lexical signals, and returns grounded responses with citations in a reproducible local setup.
 
 ## Key features
 - Document ingestion for `txt`, `md`, and `pdf` content (including base64 file upload flow).
@@ -31,7 +31,7 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
 6. Retrieval blends vector, lexical, and metadata signals, then reranks results.
 7. Answer service assembles a grounded response and returns citations, evidence metadata, and confidence signals.
 
-Note: FAISS is installed and available in the codebase, while the primary retrieval path currently scores DB-stored embeddings directly.
+Note: A FAISS-backed vector store implementation exists in the codebase for extension, while the default API retrieval flow currently scores DB-stored embeddings directly.
 
 ## How retrieval-augmented generation works in this project
 - Query text is optionally rewritten for clarity, then embedded.
