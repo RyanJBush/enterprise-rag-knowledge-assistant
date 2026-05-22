@@ -17,7 +17,7 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
 ## Tech stack
 - **Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Alembic
 - **Frontend:** React, Vite, Tailwind CSS
-- **Retrieval/IR libraries:** NumPy, rank-bm25, FAISS (installed and available in the codebase; the main retrieval flow currently uses DB-stored embeddings with similarity scoring)
+- **Retrieval/IR libraries:** NumPy, rank-bm25, FAISS
 - **Data:** SQLite by default (`DATABASE_URL` supports other DBs such as PostgreSQL)
 - **Security/platform:** JWT auth, CORS middleware, in-memory rate limiting, request metrics/logging
 - **Tooling:** Makefile workflow, pytest, Ruff, ESLint, Docker Compose
@@ -31,6 +31,8 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
 6. Retrieval blends vector, lexical, and metadata signals, then reranks results.
 7. Answer service assembles a grounded response and returns citations, evidence metadata, and confidence signals.
 
+Note: FAISS is installed and available in the codebase, while the primary retrieval path currently scores DB-stored embeddings directly.
+
 ## How retrieval-augmented generation works in this project
 - Query text is optionally rewritten for clarity, then embedded.
 - Retrieval searches indexed chunks and combines:
@@ -42,7 +44,7 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
   - returns an evidence-based heuristic response with source-linked citations, or
   - returns a low-evidence fallback when retrieval confidence is weak.
 
-> Current default behavior is grounded heuristic generation (no external hosted LLM call in the main flow).
+> Current default behavior is grounded heuristic generation (no external hosted LLM call in the main flow). This keeps development reproducible and avoids API-key dependencies for local setup.
 
 ## Setup and installation instructions
 ### Local setup
