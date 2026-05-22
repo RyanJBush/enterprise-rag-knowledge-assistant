@@ -1,7 +1,7 @@
 # Enterprise RAG Knowledge Assistant
 
 ## Executive summary
-Enterprise knowledge is often fragmented across policy docs, runbooks, and operational files. This complexity makes fast, reliable internal search difficult for teams. This project provides a full-stack Retrieval-Augmented Generation (RAG) assistant for reproducible local development. It ingests documents, chunks and indexes content, retrieves evidence with semantic and lexical signals, and returns grounded responses with citations.
+Enterprise knowledge is often fragmented across policy docs, runbooks, and operational files, which makes fast and reliable internal search difficult. This project provides a full-stack Retrieval-Augmented Generation (RAG) assistant for reproducible local development. It ingests documents, chunks and indexes content, retrieves evidence with semantic and lexical signals, and returns grounded responses with citations.
 
 ## Key features
 - Document ingestion for `txt`, `md`, and `pdf` content (including encoded binary file uploads through the API).
@@ -17,10 +17,12 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
 ## Tech stack
 - **Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Alembic
 - **Frontend:** React, Vite, Tailwind CSS
-- **Retrieval/IR libraries:** NumPy, rank-bm25, FAISS
+- **Retrieval/IR libraries:** NumPy, rank-bm25, FAISS (extension point)
 - **Data:** SQLite by default (`DATABASE_URL` supports other DBs such as PostgreSQL)
 - **Security/platform:** JWT auth, CORS middleware, in-memory rate limiting, request metrics/logging
 - **Tooling:** Makefile workflow, pytest, Ruff, ESLint, Docker Compose
+
+Note: A FAISS-backed vector store implementation exists as an extension point, but it is not the default retrieval path. The current API retrieval flow uses similarity scoring over DB-stored embeddings.
 
 ## System architecture overview
 1. Users upload raw content or files through the documents API/UI.
@@ -30,8 +32,6 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
 5. Query handling rewrites the question, applies organization/document filters, and retrieves candidates.
 6. Retrieval blends vector, lexical, and metadata signals, then reranks results.
 7. Answer service assembles a grounded response and returns citations, evidence metadata, and confidence signals.
-
-Note: A FAISS-backed vector store implementation exists as an extension point, but it is not the default retrieval path. The current API retrieval flow uses similarity scoring over DB-stored embeddings.
 
 ## How retrieval-augmented generation works in this project
 - Query text is optionally rewritten for clarity, then embedded.
