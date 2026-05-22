@@ -1,7 +1,7 @@
 # Enterprise RAG Knowledge Assistant
 
 ## Executive summary
-Enterprise knowledge is often fragmented across policy docs, runbooks, and operational files, making fast and reliable internal search difficult. This project is a full-stack Retrieval-Augmented Generation (RAG) assistant that ingests documents, chunks and indexes content, retrieves relevant evidence with semantic + lexical signals, and returns grounded responses with citations. It is designed for reproducible local development with clear service boundaries for AI engineering, data science, and enterprise search workflows.
+Enterprise knowledge is often fragmented across policy docs, runbooks, and operational files. That fragmentation makes fast, reliable internal search difficult for teams. This project provides a full-stack Retrieval-Augmented Generation (RAG) assistant that ingests documents, chunks and indexes content, retrieves evidence with semantic and lexical signals, and returns grounded responses with citations in a reproducible local setup.
 
 ## Key features
 - Document ingestion for `txt`, `md`, and `pdf` content (including base64 file upload flow).
@@ -17,7 +17,7 @@ Enterprise knowledge is often fragmented across policy docs, runbooks, and opera
 ## Tech stack
 - **Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Alembic
 - **Frontend:** React, Vite, Tailwind CSS
-- **Retrieval/IR libraries:** NumPy, FAISS (dependency present), rank-bm25
+- **Retrieval/IR libraries:** NumPy, rank-bm25, FAISS (installed and available in the codebase; the main retrieval flow currently uses DB-stored embeddings with similarity scoring)
 - **Data:** SQLite by default (`DATABASE_URL` supports other DBs such as PostgreSQL)
 - **Security/platform:** JWT auth, CORS middleware, in-memory rate limiting, request metrics/logging
 - **Tooling:** Makefile workflow, pytest, Ruff, ESLint, Docker Compose
