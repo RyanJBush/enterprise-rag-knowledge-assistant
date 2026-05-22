@@ -35,3 +35,15 @@ dev:
 
 smoke-test:
 	python scripts/smoke_test.py
+
+
+.PHONY: demo
+
+demo:
+	@echo "Quick end-to-end demo"
+	@echo "1) Install deps: make bootstrap"
+	@echo "2) Start stack: make dev"
+	@echo "3) Sign in: admin@calisto.ai / password123"
+	@echo "4) Upload sample doc: data/samples/employee_handbook.txt"
+	@echo "5) Ask in Chat: What are the PTO rules?"
+	@echo "6) Optional eval: python scripts/evaluate_retrieval.py"
