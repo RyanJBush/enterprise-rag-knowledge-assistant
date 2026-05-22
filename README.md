@@ -1,130 +1,126 @@
-# Callisto — Portfolio RAG Knowledge Platform
+# Enterprise RAG Knowledge Assistant
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Enterprise%20RAG-2ea44f?style=for-the-badge)](https://enterprise-rag.onrender.com)
-[![Deploy to Render](https://img.shields.io/badge/Deploy%20your%20own-Render-46E3B7?style=for-the-badge&logo=render)](https://render.com)
-![CI](https://github.com/RyanJBush/Enterprise-RAG-knowledge-platform/actions/workflows/ci.yml/badge.svg)
+## Executive summary
+Enterprise teams often store critical policies, runbooks, and operational knowledge across unstructured documents that are hard to search quickly and reliably. This project implements a recruiter-ready, full-stack Retrieval-Augmented Generation (RAG) assistant that ingests documents, chunks and indexes them, retrieves evidence with hybrid search, and returns grounded answers with source citations. The system is designed for local, reproducible development using deterministic embeddings and heuristic answer synthesis, while keeping clear extension points for production-grade model providers.
 
-A demo-scale retrieval-augmented generation (RAG) system for document indexing, hybrid search, and citation-grounded answer assembly.
-
-## Recruiter-facing summary
-Callisto is a full-stack portfolio project that shows how I design and implement a practical RAG pipeline, from ingestion to retrieval and answer assembly. I built it to be inspectable and honest: the default stack uses deterministic hash-based embeddings, weighted reranking, and heuristic answer synthesis so the whole workflow can run locally without paid model APIs. I am a **University of Maryland student studying Information Science and Electrical Engineering with a Business minor**.
-
-## What this project demonstrates
-- Building a complete document QA workflow: ingest → chunk → index → retrieve → synthesize answers with citations.
-- Implementing hybrid retrieval patterns that combine lexical and vector signals.
-- Structuring a FastAPI backend with explicit service boundaries for ingestion, retrieval, reranking, and answer assembly.
-- Designing demo-safe defaults (local embeddings + heuristic synthesis) that can be swapped for real model providers.
+## Key features
+- **Document ingestion pipeline** with upload endpoints, content extraction support, and chunking logic that combines semantic boundaries with fallback sliding windows.
+- **Embedding + indexing workflow** using deterministic hash-based embeddings and runtime vector search via FAISS-backed indexing services.
+- **Hybrid retrieval** that combines vector similarity, lexical keyword scoring, and metadata-aware signals.
+- **Weighted reranking pipeline** to reorder candidates before answer assembly.
+- **Grounded answer generation** that composes responses from retrieved evidence and includes chunk-level citations/source traceability.
+- **Evidence-aware guardrails** that return insufficient-evidence responses when confidence is low.
+- **Enterprise-oriented API surface** for auth, documents, chat, search, and admin metrics.
+- **Role-aware and organization-aware behavior** through JWT auth, RBAC patterns, and org-scoped retrieval/data access.
+- **Frontend interface** for login, dashboard, document management, chat, and settings pages.
 
 ## Tech stack
-- **Backend:** FastAPI, SQLAlchemy, Pydantic, Alembic
-- **Frontend:** React, Vite
-- **Retrieval/Data:** PostgreSQL, FAISS, lexical retrieval (BM25-style scoring)
-- **Dev tooling:** Docker Compose, Makefile, pytest
+- **Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Alembic
+- **Frontend:** React, Vite, Tailwind CSS
+- **Data & retrieval:** SQLite by default (PostgreSQL optional), FAISS-style vector index service, hybrid lexical/vector retrieval
+- **Security & platform concerns:** JWT-based auth, CORS configuration, in-memory rate limiting, request/usage metrics middleware
+- **Developer workflow:** Docker Compose, Makefile automation, pytest-based backend tests
 
-## Architecture overview
-Callisto follows a straightforward RAG flow: documents are uploaded, chunked, embedded/indexed, retrieved through hybrid search, then reordered with weighted reranking before template-based answer assembly.
+## System architecture overview
+The platform follows a modular service-oriented backend with clear boundaries between ingestion, embeddings, retrieval, reranking, and answer assembly.
 
-- Architecture notes: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-- API surface: [`docs/API.md`](docs/API.md)
+1. **Ingest documents** through API endpoints and persist document metadata/content.
+2. **Chunk content** into retrievable units using semantic splitting with overlap-aware fallbacks.
+3. **Generate embeddings** for chunks using a deterministic embedding service.
+4. **Index vectors** and persist chunk/embedding records for retrieval.
+5. **Retrieve candidates** with hybrid vector + keyword search, including metadata features.
+6. **Rerank candidates** using weighted retrieval features.
+7. **Assemble grounded answers** from top evidence snippets and return citations.
+8. **Expose responses in UI/API** with latency, confidence, and evidence indicators.
 
-Implementation honesty notes:
-- Answers are assembled via **heuristic answer synthesis** (template-based), not remote LLM generation by default.
-- Candidate ordering uses **weighted reranking** over retrieval features, not cross-encoder reranking.
-- Embeddings are **deterministic hash-based** by default so the app works offline/local-first; you can swap in a real embedding model.
+## How retrieval-augmented generation works in this project
+This repository implements a practical RAG pattern focused on **traceability and reproducibility**:
 
-## Architecture Diagram
-```mermaid
-flowchart LR
-    U[User]
-    F[Frontend\nReact + Vite]
-    B[Backend API\nFastAPI]
-    V[Vector DB / Index\nFAISS + SQL metadata]
-    L[LLM / Answer Generator\nHeuristic by default, provider-pluggable]
+- A user query is embedded and searched against indexed chunk vectors.
+- A lexical retrieval pass scores keyword overlap in chunk content, titles, and source names.
+- Scores are blended and reranked to produce the final evidence set.
+- The answer service evaluates evidence sufficiency and either:
+  - returns an insufficient-evidence/low-confidence fallback, or
+  - generates a grounded heuristic response from top citations.
+- Each answer includes source references (document/chunk context) so users can verify claims against original material.
 
-    U --> F
-    F --> B
-    B --> V
-    B --> L
-    V --> B
-    L --> B
-    B --> F
-```
+> Note: By default, this project does **not** call an external hosted LLM for generation; it uses a local heuristic grounded-answer composer.
 
-## How to run locally
-### One-command setup
-```bash
-make bootstrap
-```
+## Setup and installation instructions
+### Option A: Local development (without Docker)
+1. Install dependencies:
+   ```bash
+   make bootstrap
+   ```
+2. Initialize the database and seed demo data:
+   ```bash
+   make init
+   ```
+3. Start backend:
+   ```bash
+   make run-backend
+   ```
+4. Start frontend in another terminal:
+   ```bash
+   make run-frontend
+   ```
+5. Open:
+   - Frontend: `http://localhost:5173`
+   - API docs: `http://localhost:8000/docs`
 
-### One-command app start (Docker)
+### Option B: Docker Compose
 ```bash
 make dev
 ```
 
-Then open:
-- Frontend: `http://localhost:5173`
-- API docs: `http://localhost:8000/docs`
-
-Seeded users:
+### Demo credentials
 - `admin@calisto.ai` / `password123`
 - `member@calisto.ai` / `password123`
 - `viewer@calisto.ai` / `password123`
 
-## Frontend Setup
-Use this if you want to run the React frontend independently while developing against a separately running backend API.
+### Useful commands
+- Run tests/build checks:
+  ```bash
+  make test
+  ```
+- Run smoke test script:
+  ```bash
+  make smoke-test
+  ```
+- Run retrieval evaluation script:
+  ```bash
+  python scripts/evaluate_retrieval.py
+  ```
 
-1. Install frontend dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
-2. Configure environment variables (create `frontend/.env`):
-   ```bash
-   VITE_API_BASE_URL=http://localhost:8000
-   ```
-   Optional variables you may use in local development:
-   - `VITE_APP_NAME=Callisto`
-   - `VITE_ENABLE_DEVTOOLS=true`
-3. Start the frontend dev server:
-   ```bash
-   npm run dev
-   ```
-4. Open `http://localhost:5173` and ensure your backend is running (for example: `cd backend && uvicorn app.main:app --reload --port 8000`).
+## Example use cases
+- **AI Engineering:** Prototype and evaluate RAG pipelines with clear service boundaries and provider swap points.
+- **Data Science / IR:** Experiment with chunking strategies, hybrid retrieval scoring, and reranking behavior on enterprise-style corpora.
+- **Enterprise Search:** Build an internal knowledge assistant for policies, handbooks, runbooks, and operational documentation.
+- **Platform/API Engineering:** Extend a FastAPI-based knowledge service with auth, metrics, and admin endpoints.
 
-## Demo workflow
-1. Run `make bootstrap` (first time) and `make dev`.
-2. Sign in as `admin@calisto.ai`.
-3. Open **Documents** and upload one of the files from `data/samples/` (or paste text content).
-4. Open **Chat** and ask a question tied to that document.
-5. Review citations/snippets returned with the answer.
-6. (Optional) Use `python scripts/evaluate_retrieval.py` to run the sample retrieval evaluation set against the local API.
+## What I learned / skills demonstrated
+- Designing and implementing an end-to-end RAG data pipeline (ingestion → chunking → embeddings → indexing → retrieval → answer assembly).
+- Building a production-structured Python API codebase with routers, services, models, and schemas.
+- Implementing hybrid search and scoring logic that blends vector, lexical, and metadata signals.
+- Prioritizing explainability through citation-grounded outputs and low-confidence safeguards.
+- Developing full-stack integrations between a React frontend and a modular FastAPI backend.
+- Working with migration tooling, test automation, and containerized local environments.
 
-## Screenshots / Portfolio Preview
-Repository screenshots are listed in [`docs/screenshots/README.md`](docs/screenshots/README.md).
+## Resume-ready project description
+Built a full-stack **Enterprise RAG Knowledge Assistant** using **Python (FastAPI), SQLAlchemy, React, and FAISS-style vector indexing** to ingest unstructured documents, generate embeddings, perform hybrid semantic/lexical retrieval, rerank evidence, and deliver citation-grounded answers for enterprise knowledge search workflows. Implemented modular API services, JWT-based authentication, organization-aware access patterns, and evaluation scripts to support reproducible experimentation and portfolio-grade system design.
 
-Current screenshots:
-- `docs/screenshots/dashboard.png`
-- `docs/screenshots/documents.png`
-- `docs/screenshots/chat.png`
-- `docs/screenshots/admin.png`
-- `docs/screenshots/api-docs.png`
-- `docs/screenshots/audit.png`
-- `docs/screenshots/metrics.png`
+## Future improvements
+- Integrate production embedding providers (e.g., sentence-transformer or hosted embeddings) while preserving current interfaces.
+- Add configurable LLM backends for answer generation beyond heuristic composition.
+- Persist and scale vector infrastructure for larger multi-tenant corpora.
+- Expand retrieval evaluation with richer benchmark datasets and relevance metrics dashboards.
+- Add deeper observability around retrieval quality, latency, and failure modes.
 
-Design/portfolio page:
-- [`docs/preview/index.html`](docs/preview/index.html)
-
-## Architecture Decisions
-- Chunking strategy: [`docs/chunking-strategy.md`](docs/chunking-strategy.md)
-
-## Limitations and future work
-- Default embeddings are deterministic/hash-based, so semantic quality is limited compared with modern embedding APIs.
-- Answer synthesis is template-based; integrating a real LLM provider is planned but not required for local demo use.
-- Retrieval is tuned for demo-scale local datasets, not large hosted corpora.
-- CI focuses on linting and backend tests; deployment automation can be extended further.
-
-## Resume bullets
-- [`docs/resume-bullets.md`](docs/resume-bullets.md)
+## Additional docs
+- Architecture notes: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- API overview: [`docs/API.md`](docs/API.md)
+- Chunking details: [`docs/chunking-strategy.md`](docs/chunking-strategy.md)
+- Demo runbook: [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md)
 
 ## License
-- [MIT](LICENSE)
+MIT (see [`LICENSE`](LICENSE)).
