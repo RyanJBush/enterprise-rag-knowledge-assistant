@@ -1,12 +1,22 @@
-# Release Instructions
+# Release Notes
 
-1. Ensure main branch is green in CI.
-2. Update `CHANGELOG.md` with release notes.
-3. Create and push an annotated tag:
+## v1.0.0 — May 2026
+
+Initial production-ready portfolio release of the Enterprise RAG Knowledge Platform (Callisto), including:
+
+- Full-stack architecture with React frontend and FastAPI backend.
+- Document ingestion, chunking, and indexing pipeline.
+- Hybrid retrieval (lexical + vector) with weighted reranking.
+- Citation-aware answer assembly and chat experience.
+- Admin/audit and operational observability surfaces.
+- Local sample datasets and evaluation script support.
+- Developer tooling: Docker Compose, Make targets, linting, tests, and CI workflow.
+
+---
+
+## Tagging instructions
 
 ```bash
 git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
 ```
-
-4. Create a GitHub Release from tag `v1.0.0` and paste changelog highlights.

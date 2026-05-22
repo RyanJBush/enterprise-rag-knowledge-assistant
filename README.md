@@ -1,5 +1,7 @@
 # Callisto — Portfolio RAG Knowledge Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Enterprise%20RAG-2ea44f?style=for-the-badge)](https://enterprise-rag.onrender.com)
+[![Deploy to Render](https://img.shields.io/badge/Deploy%20your%20own-Render-46E3B7?style=for-the-badge&logo=render)](https://render.com)
 ![CI](https://github.com/RyanJBush/Enterprise-RAG-knowledge-platform/actions/workflows/ci.yml/badge.svg)
 
 A demo-scale retrieval-augmented generation (RAG) system for document indexing, hybrid search, and citation-grounded answer assembly.
@@ -30,6 +32,24 @@ Implementation honesty notes:
 - Candidate ordering uses **weighted reranking** over retrieval features, not cross-encoder reranking.
 - Embeddings are **deterministic hash-based** by default so the app works offline/local-first; you can swap in a real embedding model.
 
+## Architecture Diagram
+```mermaid
+flowchart LR
+    U[User]
+    F[Frontend\nReact + Vite]
+    B[Backend API\nFastAPI]
+    V[Vector DB / Index\nFAISS + SQL metadata]
+    L[LLM / Answer Generator\nHeuristic by default, provider-pluggable]
+
+    U --> F
+    F --> B
+    B --> V
+    B --> L
+    V --> B
+    L --> B
+    B --> F
+```
+
 ## How to run locally
 ### One-command setup
 ```bash
@@ -49,6 +69,27 @@ Seeded users:
 - `admin@calisto.ai` / `password123`
 - `member@calisto.ai` / `password123`
 - `viewer@calisto.ai` / `password123`
+
+## Frontend Setup
+Use this if you want to run the React frontend independently while developing against a separately running backend API.
+
+1. Install frontend dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Configure environment variables (create `frontend/.env`):
+   ```bash
+   VITE_API_BASE_URL=http://localhost:8000
+   ```
+   Optional variables you may use in local development:
+   - `VITE_APP_NAME=Callisto`
+   - `VITE_ENABLE_DEVTOOLS=true`
+3. Start the frontend dev server:
+   ```bash
+   npm run dev
+   ```
+4. Open `http://localhost:5173` and ensure your backend is running (for example: `cd backend && uvicorn app.main:app --reload --port 8000`).
 
 ## Demo workflow
 1. Run `make bootstrap` (first time) and `make dev`.
@@ -73,7 +114,6 @@ Current screenshots:
 Design/portfolio page:
 - [`docs/preview/index.html`](docs/preview/index.html)
 
-
 ## Architecture Decisions
 - Chunking strategy: [`docs/chunking-strategy.md`](docs/chunking-strategy.md)
 
@@ -81,7 +121,7 @@ Design/portfolio page:
 - Default embeddings are deterministic/hash-based, so semantic quality is limited compared with modern embedding APIs.
 - Answer synthesis is template-based; integrating a real LLM provider is planned but not required for local demo use.
 - Retrieval is tuned for demo-scale local datasets, not large hosted corpora.
-- There is no full CI deployment pipeline in this repository today.
+- CI focuses on linting and backend tests; deployment automation can be extended further.
 
 ## Resume bullets
 - [`docs/resume-bullets.md`](docs/resume-bullets.md)
